@@ -87,10 +87,14 @@ namespace TerrainGeneration
 
             var worldParam = GL.GetUniformLocation(entity.EntityProgram, "WorldTransform");
             var viewProjParam = GL.GetUniformLocation(entity.EntityProgram, "ViewProjectionTransform");
-
+            
             // Set transforms
             GL.UniformMatrix4(worldParam, false, ref entity.Transform);
             GL.UniformMatrix4(viewProjParam, false, ref ViewProj);
+
+            // Set InputColor parameter to red
+            /* var inputColorParam = GL.GetUniformLocation(entity.EntityProgram, "InputColor");
+            GL.Uniform3(inputColorParam, Vector3.UnitX); */
 
             // Draw the mesh
             entity.EntityMesh.Enable();

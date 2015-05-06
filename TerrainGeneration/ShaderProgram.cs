@@ -11,7 +11,7 @@ namespace TerrainGeneration
     /// <summary>
     /// A class for an OpenGL shader program
     /// </summary>
-    class ShaderProgram : IDisposable
+    public class ShaderProgram : IDisposable
     {
         public int Handle;
         
