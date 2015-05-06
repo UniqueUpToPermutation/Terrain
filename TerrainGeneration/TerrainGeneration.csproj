@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Camera.cs" />
     <Compile Include="CameraController.cs" />
+    <Compile Include="DiamondSquare.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Program.cs" />
