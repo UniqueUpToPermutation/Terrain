@@ -59,9 +59,12 @@ namespace TerrainGeneration
             Debug.WriteLine("Loading Shaders...");
             ShaderProgram terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\Terrain.vert", "Shaders\\Terrain.frag");
 
+            var cellSize = new Vector3(8f, 1f, 8f);
+
             // Create our terrain entity
             Debug.WriteLine("Creating Mesh Data...");
-            var terrainData = TerrainData.CreateGaussian(64, 64, Vector2.One * 4.0f, 40.0f, new Vector2(128f, 128f), 30f);
+            var heightMap = DiamondSquare.GenerateRandom(5f, 100f, 6);
+            var terrainData = heightMap.ToTerrainData(cellSize);
             var terrainMesh = terrainData.CreateMesh();
             var terrainEntity = new Entity()
             {
@@ -79,9 +82,9 @@ namespace TerrainGeneration
             // Position the camera correctly
             CameraController = new RotationCameraController(Renderer.Camera, Keyboard, Mouse)
             {
-                CameraCenter = new Vector3(128f, 0f, 128f),
+                CameraCenter = new Vector3(cellSize.X * (float)heightMap.Width / 2f, 0f, cellSize.Z * (float)heightMap.Width / 2f),
                 Phi = (float)Math.PI / 4f,
-                Radius = 128f
+                Radius = cellSize.X * (float)heightMap.Width / 2f + cellSize.Z * (float)heightMap.Width / 2f
             };
             CameraController.UpdateCameraParams();
         }
