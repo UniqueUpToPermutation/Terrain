@@ -102,7 +102,12 @@ namespace TerrainGeneration
                         }
 
                         sampleTotal /= sampleSum;
-                        sampleTotal += (float)(random.NextDouble() * 2.0 - 1.0) * errorConstant * rectangleSize;
+
+                        // Old code, use same random range as for the square step
+                        // sampleTotal += (float)(random.NextDouble() * 2.0 - 1.0) * errorConstant * rectangleSize;
+
+                        // This produces a cooler looking result, reduce random range
+                        sampleTotal += (float)(random.NextDouble() * 2.0 - 1.0) * errorConstant * rectangleSize / 1.5f;
 
                         newMap[xCoord, y] = sampleTotal;
                     }
