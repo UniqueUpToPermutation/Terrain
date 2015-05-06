@@ -59,11 +59,11 @@ namespace TerrainGeneration
             Debug.WriteLine("Loading Shaders...");
             ShaderProgram terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\Terrain.vert", "Shaders\\Terrain.frag");
 
-            var cellSize = new Vector3(8f, 1f, 8f);
+            var cellSize = new Vector3(4f, 1f, 4f);
 
             // Create our terrain entity
             Debug.WriteLine("Creating Mesh Data...");
-            var heightMap = DiamondSquare.GenerateRandom(5f, 100f, 6);
+            var heightMap = DiamondSquare.GenerateRandom(1.5f, 70f, 7);
             var terrainData = heightMap.ToTerrainData(cellSize);
             var terrainMesh = terrainData.CreateMesh();
             var terrainEntity = new Entity()

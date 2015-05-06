@@ -68,41 +68,44 @@ namespace TerrainGeneration
                 }
 
             // Diamond step
-            for (int y = 0; y < newMap.Height - 1; ++y)
+            for (int y = 0; y < newMap.Height; ++y)
             {
                 var dx = (y + 1) % 2;
-                for (int x = 0; x < baseHeights.Width - 1; ++x)
+                for (int x = 0; x < baseHeights.Width; ++x)
                 {
                     var sampleSum = 0f;
                     var xCoord = 2 * x + dx;
                     var sampleTotal = 0f;
 
-                    // Take samples from the surrounding diamond
-                    if (xCoord > 0)
+                    if (xCoord < newMap.Width)
                     {
-                        sampleSum += 1f;
-                        sampleTotal += newMap[xCoord - 1, y];
-                    }
-                    if (xCoord < newMap.Width - 1)
-                    {
-                        sampleSum += 1f;
-                        sampleTotal += newMap[xCoord + 1, y];
-                    }
-                    if (y > 0)
-                    {
-                        sampleSum += 1f;
-                        sampleTotal += newMap[xCoord, y - 1];
-                    }
-                    if (y < newMap.Height - 1)
-                    {
-                        sampleSum += 1f;
-                        sampleTotal += newMap[xCoord, y + 1];
-                    }
+                        // Take samples from the surrounding diamond
+                        if (xCoord > 0)
+                        {
+                            sampleSum += 1f;
+                            sampleTotal += newMap[xCoord - 1, y];
+                        }
+                        if (xCoord < newMap.Width - 1)
+                        {
+                            sampleSum += 1f;
+                            sampleTotal += newMap[xCoord + 1, y];
+                        }
+                        if (y > 0)
+                        {
+                            sampleSum += 1f;
+                            sampleTotal += newMap[xCoord, y - 1];
+                        }
+                        if (y < newMap.Height - 1)
+                        {
+                            sampleSum += 1f;
+                            sampleTotal += newMap[xCoord, y + 1];
+                        }
 
-                    sampleTotal /= sampleSum;
-                    sampleTotal += (float)(random.NextDouble() * 2.0 - 1.0) * errorConstant * rectangleSize;
+                        sampleTotal /= sampleSum;
+                        sampleTotal += (float)(random.NextDouble() * 2.0 - 1.0) * errorConstant * rectangleSize;
 
-                    newMap[xCoord, y] = sampleTotal;
+                        newMap[xCoord, y] = sampleTotal;
+                    }
                 }
             }
 
