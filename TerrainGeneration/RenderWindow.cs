@@ -24,7 +24,7 @@ namespace TerrainGeneration
         public CameraController CameraController { get; protected set; }
         public bool bUseTextured = true;
 
-        public RenderWindow() : base(800, 600)
+        public RenderWindow() : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 4))
         {
             Title = "Terrain Generation Project";
             Icon = Properties.Resources.ProgramIcon;
