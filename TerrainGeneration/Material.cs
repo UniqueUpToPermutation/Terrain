@@ -58,9 +58,12 @@ namespace TerrainGeneration
         public Vector2 UVScale = Vector2.One;
         protected int uvScaleUniform;
 
-        public TerrainTextureMaterial(ShaderProgram program, Texture texture) : base(program)
+        public TerrainTextureMaterial(ShaderProgram program, Texture texture1, Texture texture2, Texture texture3, Texture texture4) : base(program)
         {
-            Textures.Add(texture);
+            Textures.Add(texture1);
+            Textures.Add(texture2);
+            Textures.Add(texture3);
+            Textures.Add(texture4);
 
             uvScaleUniform = GL.GetUniformLocation(program, "UVScale");
             if (uvScaleUniform < 0)
@@ -71,6 +74,15 @@ namespace TerrainGeneration
         {
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, Textures[0]);
+
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, Textures[1]);
+
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture2D, Textures[2]);
+
+            GL.ActiveTexture(TextureUnit.Texture3);
+            GL.BindTexture(TextureTarget.Texture2D, Textures[3]);
 
             GL.Uniform2(uvScaleUniform, ref UVScale);
         }

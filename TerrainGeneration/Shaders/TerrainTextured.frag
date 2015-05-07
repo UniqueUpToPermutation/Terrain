@@ -8,6 +8,9 @@ out vec3 color;
 uniform vec3 LightDirection = normalize(vec3(-1.0, -1.0, -1.0));
 uniform vec2 UVScale = vec2(1.0, 1.0);
 uniform sampler2D grassSampler;
+uniform sampler2D snowSampler;
+uniform sampler2D dirtSampler;
+uniform sampler2D rockSampler;
 
 void main()
 {
