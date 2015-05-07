@@ -42,7 +42,7 @@ namespace TerrainGeneration
             GL.Enable(EnableCap.CullFace);
 
             // Wireframe
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
         }
 
         public void OnResize(Size ClientSize)
