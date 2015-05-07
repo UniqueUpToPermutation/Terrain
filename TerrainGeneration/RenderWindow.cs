@@ -72,9 +72,19 @@ namespace TerrainGeneration
                 Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
                 Scene.Resources.Add(grassTexture);
 
+                // phil help this is throwing an error
+                Texture snowTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Scene.Resources.Add(snowTexture);
+
+                Texture dirtTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Scene.Resources.Add(snowTexture);
+
+                Texture rockTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Scene.Resources.Add(snowTexture);
+
                 // Load textured material
                 terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainTextured.vert", "Shaders\\TerrainTextured.frag");
-                terrainMaterial = new TerrainTextureMaterial(terrainShader, grassTexture)
+                terrainMaterial = new TerrainTextureMaterial(terrainShader, grassTexture, snowTexture, dirtTexture, rockTexture)
                 {
                     UVScale = new Vector2(1f / 64f, 1f / 64f)
                 };
