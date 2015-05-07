@@ -72,60 +72,44 @@ namespace TerrainGeneration
             // Render all entities in the scene
             if (scene != null)
             {
+                // Group by shader
                 var shaderIterator = scene.Entities.GroupBy(t => t.EntityMaterial.Shader);
-
-                var currentShader = -1;
-                Mesh currentMesh = null;
-                Material currentMaterial = null;
 
                 foreach (var shaderGroup in shaderIterator)
                 {
-                    // Change shader if necessary
-                    if (currentShader != shaderGroup.Key)
-                    {
-                        currentShader = shaderGroup.Key;
-                        GL.UseProgram(currentShader);
-                    }
+                    // Change shader
+                    GL.UseProgram(shaderGroup.Key);
 
+                    // Group by material
                     var materialIterator = shaderGroup.GroupBy(t => t.EntityMaterial);
 
                     foreach (var materialGroup in materialIterator)
                     {
                         // Change material if necessary
-                        if (currentMaterial != materialGroup.Key)
-                        {
-                            currentMaterial = materialGroup.Key;
-                            currentMaterial.Apply();
+                        materialGroup.Key.Apply();
 
-                            // Set View Projection Transform
-                            GL.UniformMatrix4(currentMaterial.ViewProjectionUniform, false, ref ViewProj);
-                        }
+                        // Set View Projection Transform
+                        GL.UniformMatrix4(materialGroup.Key.ViewProjectionUniform, false, ref ViewProj);
 
+                        // Group by mesh
                         var meshIterator = materialGroup.GroupBy(t => t.EntityMesh);
 
                         foreach (var meshGroup in meshIterator)
                         {
-                            // Change mesh if necessary
-                            if (currentMesh != meshGroup.Key)
-                            {
-                                if (currentMesh != null)
-                                    currentMesh.Disable();
-                                currentMesh = meshGroup.Key;
-                                currentMesh.Enable();
-                            }
+                            // Enable mesh
+                            meshGroup.Key.Enable();
 
                             foreach (var entity in meshGroup)
                             {
                                 // Actually render
                                 RenderEntity(entity, ref ViewProj);
                             }
+
+                            // Disable mesh
+                            meshGroup.Key.Disable();
                         }
                     }
                 }
-
-                // Cleanup
-                if (currentMesh != null)
-                    currentMesh.Disable();
             }
         }
 
