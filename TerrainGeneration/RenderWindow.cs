@@ -23,6 +23,7 @@ namespace TerrainGeneration
         public Scene Scene { get; protected set; }
         public CameraController CameraController { get; protected set; }
         public bool bUseTextured = true;
+        public bool bUseMultiTextured = true;
 
         public RenderWindow() : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 4))
         {
@@ -66,25 +67,37 @@ namespace TerrainGeneration
             Material terrainMaterial = null;
 
             // Load materials
-            if (bUseTextured)
+            if (bUseMultiTextured)
             {
-                // Load a texture
+                // Load textures
                 Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
                 Scene.Resources.Add(grassTexture);
 
-                // phil help this is throwing an error
-                Texture snowTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Texture snowTexture = ResourceLoader.LoadTextureFromFile("Textures\\Snow.jpg");
                 Scene.Resources.Add(snowTexture);
 
-                Texture dirtTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Texture dirtTexture = ResourceLoader.LoadTextureFromFile("Textures\\Dirt.jpg");
                 Scene.Resources.Add(snowTexture);
 
-                Texture rockTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Texture rockTexture = ResourceLoader.LoadTextureFromFile("Textures\\Rock.jpg");
                 Scene.Resources.Add(snowTexture);
 
                 // Load textured material
+                terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainMultiTextured.vert", "Shaders\\TerrainMultiTextured.frag");
+                terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, grassTexture, snowTexture, dirtTexture, rockTexture)
+                {
+                    UVScale = new Vector2(1f / 64f, 1f / 64f)
+                };
+            }
+            else if (bUseTextured)
+            {
+                // Load textures
+                Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Scene.Resources.Add(grassTexture);
+
+                // Load textured material
                 terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainTextured.vert", "Shaders\\TerrainTextured.frag");
-                terrainMaterial = new TerrainTextureMaterial(terrainShader, grassTexture, snowTexture, dirtTexture, rockTexture)
+                terrainMaterial = new TerrainTextureMaterial(terrainShader, grassTexture)
                 {
                     UVScale = new Vector2(1f / 64f, 1f / 64f)
                 };

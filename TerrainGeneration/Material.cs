@@ -58,31 +58,24 @@ namespace TerrainGeneration
         public Vector2 UVScale = Vector2.One;
         protected int uvScaleUniform;
 
-        public TerrainTextureMaterial(ShaderProgram program, Texture texture1, Texture texture2, Texture texture3, Texture texture4) : base(program)
+        public TerrainTextureMaterial(ShaderProgram program) 
+            : base(program)
         {
-            Textures.Add(texture1);
-            Textures.Add(texture2);
-            Textures.Add(texture3);
-            Textures.Add(texture4);
-
             uvScaleUniform = GL.GetUniformLocation(program, "UVScale");
             if (uvScaleUniform < 0)
                 Debug.WriteLine("Could not find UVScale uniform!");
+        }
+
+        public TerrainTextureMaterial(ShaderProgram program, Texture texture)
+            : this(program)
+        {
+            Textures.Add(texture);
         }
 
         public override void Apply()
         {
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, Textures[0]);
-
-            GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, Textures[1]);
-
-            GL.ActiveTexture(TextureUnit.Texture2);
-            GL.BindTexture(TextureTarget.Texture2D, Textures[2]);
-
-            GL.ActiveTexture(TextureUnit.Texture3);
-            GL.BindTexture(TextureTarget.Texture2D, Textures[3]);
 
             GL.Uniform2(uvScaleUniform, ref UVScale);
         }
@@ -91,6 +84,26 @@ namespace TerrainGeneration
         {
             if (parameterName == "UVScale")
                 UVScale = (Vector2)value;
+        }
+    }
+
+    public class TerrainMultiTextureMaterial : TerrainTextureMaterial
+    {
+        public TerrainMultiTextureMaterial(ShaderProgram shader, params Texture[] textures)
+            : base(shader)
+        {
+            Textures.AddRange(textures);
+        }
+
+        public override void Apply()
+        {
+            for (int i = 0; i < Textures.Count; ++i)
+            {
+                GL.ActiveTexture(TextureUnit.Texture0 + i);
+                GL.BindTexture(TextureTarget.Texture2D, Textures[i]);
+            }
+
+            GL.Uniform2(uvScaleUniform, ref UVScale);
         }
     }
 }
