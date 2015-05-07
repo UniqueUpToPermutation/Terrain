@@ -69,12 +69,12 @@ namespace TerrainGeneration
             if (bUseTextured)
             {
                 // Load a texture
-                Texture terrainTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
-                Scene.Resources.Add(terrainTexture);
+                Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Scene.Resources.Add(grassTexture);
 
                 // Load textured material
                 terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainTextured.vert", "Shaders\\TerrainTextured.frag");
-                terrainMaterial = new TerrainTextureMaterial(terrainShader, terrainTexture)
+                terrainMaterial = new TerrainTextureMaterial(terrainShader, grassTexture)
                 {
                     UVScale = new Vector2(1f / 64f, 1f / 64f)
                 };

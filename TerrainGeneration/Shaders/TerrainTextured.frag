@@ -7,11 +7,11 @@ out vec3 color;
 
 uniform vec3 LightDirection = normalize(vec3(-1.0, -1.0, -1.0));
 uniform vec2 UVScale = vec2(1.0, 1.0);
-uniform sampler2D DiffuseSampler;
+uniform sampler2D grassSampler;
 
 void main()
 {
 	vec2 uv = vec2(Position.x * UVScale.x, Position.z * UVScale.y);
 	float intensity = clamp(-dot(LightDirection, normalize(Normal)), 0.0, 1.0);
-	color = texture(DiffuseSampler, uv).rgb * intensity;
+	color = texture(grassSampler, uv).rgb * intensity;
 }
