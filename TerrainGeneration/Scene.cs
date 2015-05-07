@@ -28,8 +28,8 @@ namespace TerrainGeneration
     /// </summary>
     public class Entity
     {
+        public Material EntityMaterial;
         public Mesh EntityMesh;
-        public int EntityProgram;
         public Matrix4 Transform;
     }
 }

@@ -40,9 +40,6 @@ namespace TerrainGeneration
 
             // Cull back faces
             GL.Enable(EnableCap.CullFace);
-
-            // Wireframe
-            // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
         }
 
         public void OnResize(Size ClientSize)
@@ -75,31 +72,70 @@ namespace TerrainGeneration
             // Render all entities in the scene
             if (scene != null)
             {
-                foreach (var entity in scene.Entities)
-                    RenderEntity(entity, ref ViewProj);
+                var shaderIterator = scene.Entities.GroupBy(t => t.EntityMaterial.Shader);
+
+                var currentShader = -1;
+                Mesh currentMesh = null;
+                Material currentMaterial = null;
+
+                foreach (var shaderGroup in shaderIterator)
+                {
+                    // Change shader if necessary
+                    if (currentShader != shaderGroup.Key)
+                    {
+                        currentShader = shaderGroup.Key;
+                        GL.UseProgram(currentShader);
+                    }
+
+                    var materialIterator = shaderGroup.GroupBy(t => t.EntityMaterial);
+
+                    foreach (var materialGroup in materialIterator)
+                    {
+                        // Change material if necessary
+                        if (currentMaterial != materialGroup.Key)
+                        {
+                            currentMaterial = materialGroup.Key;
+                            currentMaterial.Apply();
+
+                            // Set View Projection Transform
+                            GL.UniformMatrix4(currentMaterial.ViewProjectionUniform, false, ref ViewProj);
+                        }
+
+                        var meshIterator = materialGroup.GroupBy(t => t.EntityMesh);
+
+                        foreach (var meshGroup in meshIterator)
+                        {
+                            // Change mesh if necessary
+                            if (currentMesh != meshGroup.Key)
+                            {
+                                if (currentMesh != null)
+                                    currentMesh.Disable();
+                                currentMesh = meshGroup.Key;
+                                currentMesh.Enable();
+                            }
+
+                            foreach (var entity in meshGroup)
+                            {
+                                // Actually render
+                                RenderEntity(entity, ref ViewProj);
+                            }
+                        }
+                    }
+                }
+
+                // Cleanup
+                if (currentMesh != null)
+                    currentMesh.Disable();
             }
         }
 
         public void RenderEntity(Entity entity, ref Matrix4 ViewProj)
         {
-            // We'll do the slow way for now, clean this up later
-            GL.UseProgram(entity.EntityProgram);
-
-            var worldParam = GL.GetUniformLocation(entity.EntityProgram, "WorldTransform");
-            var viewProjParam = GL.GetUniformLocation(entity.EntityProgram, "ViewProjectionTransform");
-            
             // Set transforms
-            GL.UniformMatrix4(worldParam, false, ref entity.Transform);
-            GL.UniformMatrix4(viewProjParam, false, ref ViewProj);
-
-            // Set InputColor parameter to red
-            /* var inputColorParam = GL.GetUniformLocation(entity.EntityProgram, "InputColor");
-            GL.Uniform3(inputColorParam, Vector3.UnitX); */
+            GL.UniformMatrix4(entity.EntityMaterial.WorldUniform, false, ref entity.Transform);
 
             // Draw the mesh
-            entity.EntityMesh.Enable();
             entity.EntityMesh.Draw();
-            entity.EntityMesh.Disable();
         }
 
         public void Dispose()

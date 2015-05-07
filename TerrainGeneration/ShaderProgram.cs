@@ -9,12 +9,38 @@ using OpenTK.Graphics.OpenGL;
 namespace TerrainGeneration
 {
     /// <summary>
-    /// A class for an OpenGL shader program
+    /// A struct for an OpenGL texture
     /// </summary>
-    public class ShaderProgram : IDisposable
+    public struct Texture : IDisposable
     {
         public int Handle;
-        
+
+        public static implicit operator int(Texture program)
+        {
+            return program.Handle;
+        }
+
+        public static implicit operator Texture(int handle)
+        {
+            return new Texture()
+            {
+                Handle = handle
+            };
+        }
+
+        public void Dispose()
+        {
+            GL.DeleteTexture(Handle);
+        }
+    }
+
+    /// <summary>
+    /// A struct for an OpenGL shader program
+    /// </summary>
+    public struct ShaderProgram : IDisposable
+    {
+        public int Handle;
+
         public static implicit operator int(ShaderProgram program)
         {
             return program.Handle;

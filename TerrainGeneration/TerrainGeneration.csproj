@@ -55,6 +55,7 @@
     <Compile Include="CameraController.cs" />
     <Compile Include="DiamondSquare.cs" />
     <Compile Include="IndexBuffer.cs" />
+    <Compile Include="Material.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

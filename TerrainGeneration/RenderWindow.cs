@@ -61,6 +61,9 @@ namespace TerrainGeneration
 
             var cellSize = new Vector3(4f, 1f, 4f);
 
+            // Create our material
+            var material = new DefaultMaterial(terrainShader);
+
             // Create our terrain entity
             Debug.WriteLine("Creating Mesh Data...");
             var heightMap = DiamondSquare.GenerateRandom(1.5f, 70f, 7);
@@ -70,7 +73,7 @@ namespace TerrainGeneration
             {
                 EntityMesh = terrainMesh,
                 Transform = Matrix4.Identity,
-                EntityProgram = terrainShader
+                EntityMaterial = material
             };
 
             // Create our scene
