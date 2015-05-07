@@ -41,6 +41,10 @@ namespace TerrainGeneration
             // Generate mipmaps
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
+            // Use good sampling
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
             return id;
         }
 
