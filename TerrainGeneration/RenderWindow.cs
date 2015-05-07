@@ -22,6 +22,7 @@ namespace TerrainGeneration
         public Renderer Renderer { get; protected set; }
         public Scene Scene { get; protected set; }
         public CameraController CameraController { get; protected set; }
+        public bool bUseTextured = true;
 
         public RenderWindow() : base(800, 600)
         {
@@ -55,15 +56,36 @@ namespace TerrainGeneration
 
         protected virtual void CreateScene()
         {
-            // Load our shader
-            Debug.WriteLine("Loading Shaders...");
-            ShaderProgram terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\Terrain.vert", "Shaders\\Terrain.frag");
-
+            // Create our scene
+            Scene = new Scene();
             var cellSize = new Vector3(4f, 1f, 4f);
 
-            // Create our material
-            var material = new DefaultMaterial(terrainShader);
+            // Load our shader
+            Debug.WriteLine("Loading Materials...");
+            ShaderProgram terrainShader = -1;
+            Material terrainMaterial = null;
 
+            // Load materials
+            if (bUseTextured)
+            {
+                // Load a texture
+                Texture terrainTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                Scene.Resources.Add(terrainTexture);
+
+                // Load textured material
+                terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainTextured.vert", "Shaders\\TerrainTextured.frag");
+                terrainMaterial = new TerrainTextureMaterial(terrainShader, terrainTexture)
+                {
+                    UVScale = new Vector2(1f / 64f, 1f / 64f)
+                };
+            }
+            else
+            {
+                // Load default material
+                terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\Terrain.vert", "Shaders\\Terrain.frag");
+                terrainMaterial = new DefaultMaterial(terrainShader);
+            }
+                               
             // Create our terrain entity
             Debug.WriteLine("Creating Mesh Data...");
             var heightMap = DiamondSquare.GenerateRandom(1.5f, 70f, 7);
@@ -73,11 +95,10 @@ namespace TerrainGeneration
             {
                 EntityMesh = terrainMesh,
                 Transform = Matrix4.Identity,
-                EntityMaterial = material
+                EntityMaterial = terrainMaterial
             };
 
-            // Create our scene
-            Scene = new Scene();
+            // Add resources to scene (auto-cleanup)
             Scene.Resources.Add(terrainMesh);
             Scene.Resources.Add(terrainShader);
             Scene.Entities.Add(terrainEntity); 
