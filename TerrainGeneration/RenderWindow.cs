@@ -86,10 +86,12 @@ namespace TerrainGeneration
 
             Keyboard.KeyDown += OnKeyDown;
 
+            // Create the renderer
             Debug.WriteLine("Initializing Renderer...");
             Renderer = CreateRenderer();
             Renderer.Initialize(this);
 
+            // Create the scene to be rendered
             Debug.WriteLine("Creating Scene...");
             CreateScene();
         }
@@ -104,11 +106,17 @@ namespace TerrainGeneration
 
         protected override void OnResize(EventArgs e)
         {
+            // Let the renderer know the screen size changed
             Renderer.OnResize(ClientSize);
 
             base.OnResize(e);
         }
 
+        /// <summary>
+        /// Load the material and textures for the terrain entities
+        /// </summary>
+        /// <param name="terrainData">The terrain data</param>
+        /// <returns>A material for the terrain</returns>
         protected virtual Material LoadTerrainMaterial(TerrainData terrainData)
         {
             // Load our shader
@@ -178,6 +186,9 @@ namespace TerrainGeneration
             return terrainMaterial;
         }
 
+        /// <summary>
+        /// Creates a scene to be rendered
+        /// </summary>
         protected virtual void CreateScene()
         {
             // Create our scene
@@ -218,12 +229,15 @@ namespace TerrainGeneration
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            // Close the application if the user presses escape
             if (Keyboard[Key.Escape])
                 Close();
 
+            // Update the camera
             if (CameraController != null)
                 CameraController.UpdateCamera(e);
 
+            // Update the renderer
             Renderer.OnUpdateFrame(e);
         }
 

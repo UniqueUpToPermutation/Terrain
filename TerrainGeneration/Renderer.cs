@@ -13,12 +13,14 @@ namespace TerrainGeneration
 {
     public class Renderer : IDisposable
     {
+        /// <summary>
+        /// Gets or sets the camera of the renderer
+        /// </summary>
         public Camera Camera { get; set; }
 
-        protected Size clientSize;
-        protected int vertexArray = -1;
-        protected bool bUseWireframe = false;
-
+        /// <summary>
+        /// Gets or sets the use of wireframe
+        /// </summary>
         public bool UseWireframe
         {
             get { return bUseWireframe; }
@@ -29,10 +31,17 @@ namespace TerrainGeneration
             }
         }
 
+        /// <summary>
+        /// Gets the size of the client region
+        /// </summary>
         public Size ClientSize
         {
             get { return clientSize; }
         }
+
+        protected Size clientSize;
+        protected int vertexArray = -1;
+        protected bool bUseWireframe = false;
 
         public void Initialize(RenderWindow window)
         {
