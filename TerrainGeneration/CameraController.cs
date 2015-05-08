@@ -33,7 +33,7 @@ namespace TerrainGeneration
 
         public float PhiVelocity = 0.01f;
         public float ThetaVelocity = 0.01f;
-        public float RadiusVelocity = 2.0f;
+        public float RadiusVelocity = 4.0f;
 
         protected int lastMouseX = 0;
         protected int lastMouseY = 0;
