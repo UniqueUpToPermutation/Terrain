@@ -317,5 +317,39 @@ namespace TerrainGeneration
                 VertexAttributeBuffers = vertexAttributeBuffers.ToArray()
             };
         }
+
+        public Mesh[] CreateMeshChunks(int chunkSize)
+        {
+            return CreateMeshChunks(chunkSize, MeshCreationOptions.Default);
+        }
+        
+        public Mesh[] CreateMeshChunks(int chunkSize, MeshCreationOptions options)
+        {
+            var chunkCountX = (DataSizeX - 1) / chunkSize;
+            var chunkCountZ = (DataSizeZ - 1) / chunkSize;
+            
+            if (chunkCountX * chunkSize < DataSizeX - 1)
+                chunkCountX++;
+            if (chunkCountZ * chunkSize < DataSizeZ - 1)
+                chunkCountZ++;
+
+            var chunks = new Mesh[chunkCountX * chunkCountZ];
+
+            for (int z = 0; z < chunkCountZ; ++z)
+            {
+                for (int x = 0; x < chunkCountX; ++x)
+                {
+                    var beginX = x * chunkSize;
+                    var beginZ = z * chunkSize;
+                    var width = Math.Min(chunkSize + 1, DataSizeX - beginX);
+                    var height = Math.Min(chunkSize + 1, DataSizeZ - beginZ);
+
+                    options.MeshBounds = new Rectangle(beginX, beginZ, width, height);
+                    chunks[x + chunkCountX * z] = CreateMesh(options);
+                }
+            }
+
+            return chunks;
+        }
     }
 }

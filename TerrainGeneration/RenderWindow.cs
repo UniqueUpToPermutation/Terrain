@@ -36,7 +36,11 @@ namespace TerrainGeneration
         public int Iterations { get; set; }
         public Vector3 CellSize { get; set; }
         public bool Fullscreen { get; set; }
+        public int ChuckSize { get; set; }
 
+        /// <summary>
+        /// Generate the default terrain
+        /// </summary>
         public static ApplicationOptions Default
         {
             get
@@ -49,7 +53,29 @@ namespace TerrainGeneration
                     MaxSeedHeight = 70f,
                     Iterations = 7,
                     CellSize = new Vector3(4f, 1f, 4f),
-                    Fullscreen = false
+                    Fullscreen = false,
+                    ChuckSize = 128
+                };
+            }
+        }
+
+        /// <summary>
+        /// Generate a larger terrain
+        /// </summary>
+        public static ApplicationOptions LargeTerrain
+        {
+            get
+            {
+                return new ApplicationOptions()
+                {
+                    TerrainRenderMode = RenderMode.Multitextured,
+                    UVScale = new Vector2(1f / 64f, 1f / 64f),
+                    ErrorConstant = 0.8f,
+                    MaxSeedHeight = 20f,
+                    Iterations = 8,
+                    CellSize = new Vector3(2f, 1f, 2f),
+                    Fullscreen = false,
+                    ChuckSize = 128
                 };
             }
         }
@@ -63,7 +89,7 @@ namespace TerrainGeneration
         public Renderer Renderer { get; protected set; }
         public Scene Scene { get; protected set; }
         public CameraController CameraController { get; protected set; }
-        public ApplicationOptions Options = ApplicationOptions.Default;
+        public ApplicationOptions Options = ApplicationOptions.LargeTerrain;
 
         public RenderWindow()
             : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 2))
@@ -186,6 +212,27 @@ namespace TerrainGeneration
             return terrainMaterial;
         }
 
+        protected virtual void CreateTerrainChunks(TerrainData terrainData, Material terrainMaterial)
+        {
+            // Generate terrain chunks
+            var terrainChunks = terrainData.CreateMeshChunks(Options.ChuckSize, MeshCreationOptions.Default);
+
+            foreach (var chunk in terrainChunks)
+            {
+                // Create our terrain entity
+                var terrainChunkEntity = new Entity()
+                {
+                    EntityMesh = chunk,
+                    Transform = Matrix4.Identity,
+                    EntityMaterial = terrainMaterial
+                };
+
+                // Add resources to scene (auto-cleanup)
+                Scene.Resources.Add(chunk);
+                Scene.Entities.Add(terrainChunkEntity);
+            }
+        }
+
         /// <summary>
         /// Creates a scene to be rendered
         /// </summary>
@@ -196,26 +243,15 @@ namespace TerrainGeneration
             var cellSize = Options.CellSize;
 
             // Generate mesh data
-            Debug.WriteLine("Creating Mesh Data...");
+            Debug.WriteLine("Creating Height Data...");
             var heightMap = DiamondSquare.GenerateRandom(Options.ErrorConstant, Options.MaxSeedHeight, Options.Iterations);
             var terrainData = heightMap.ToTerrainData(cellSize);
-
-            var terrainMesh = terrainData.CreateMesh();
-
+            
             Debug.WriteLine("Loading Materials...");
             var terrainMaterial = LoadTerrainMaterial(terrainData);
 
-            // Create our terrain entity
-            var terrainEntity = new Entity()
-            {
-                EntityMesh = terrainMesh,
-                Transform = Matrix4.Identity,
-                EntityMaterial = terrainMaterial
-            };
-
-            // Add resources to scene (auto-cleanup)
-            Scene.Resources.Add(terrainMesh);
-            Scene.Entities.Add(terrainEntity);
+            Debug.WriteLine("Creating Mesh Data...");
+            CreateTerrainChunks(terrainData, terrainMaterial);
 
             // Position the camera correctly
             CameraController = new RotationCameraController(Renderer.Camera, Keyboard, Mouse)
