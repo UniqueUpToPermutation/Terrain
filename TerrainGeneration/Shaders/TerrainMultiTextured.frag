@@ -18,6 +18,7 @@ void main()
 	vec2 uv = vec2(Position.x * UVScale.x, Position.z * UVScale.y);
 	float intensity = clamp(-dot(LightDirection, normalize(Normal)), 0.0, 1.0);
 
-	vec3 textureVec = texture(snowSampler, uv).rgb;
+	//vec3 textureVec = texture(grassSampler, uv).rgb;
+	vec3 textureVec = texture(dirtSampler, uv).rgb;
 	color = textureVec * intensity;
 }

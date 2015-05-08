@@ -22,7 +22,7 @@ namespace TerrainGeneration
         public Renderer Renderer { get; protected set; }
         public Scene Scene { get; protected set; }
         public CameraController CameraController { get; protected set; }
-        public bool bUseTextured = true;
+        public bool bUseTextured = false;
         public bool bUseMultiTextured = true;
 
         public RenderWindow() : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 4))
@@ -84,7 +84,14 @@ namespace TerrainGeneration
 
                 // Load textured material
                 terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainMultiTextured.vert", "Shaders\\TerrainMultiTextured.frag");
-                terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, grassTexture, snowTexture, dirtTexture, rockTexture)
+
+                Texture[] textureArray = new Texture[4];
+                textureArray[0] = grassTexture;
+                textureArray[1] = snowTexture;
+                textureArray[2] = dirtTexture;
+                textureArray[3] = rockTexture;
+
+                terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, textureArray)
                 {
                     UVScale = new Vector2(1f / 64f, 1f / 64f)
                 };
