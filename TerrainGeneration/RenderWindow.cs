@@ -15,6 +15,43 @@ using OpenTK.Input;
 namespace TerrainGeneration
 {
     /// <summary>
+    /// A enumeration of different render modes
+    /// </summary>
+    public enum RenderMode
+    {
+        NoTexture,
+        Textured,
+        Multitextured
+    }
+
+    /// <summary>
+    /// Options for the application
+    /// </summary>
+    public class ApplicationOptions
+    {
+        public RenderMode TerrainRenderMode { get; set; }
+        public Vector2 UVScale { get; set; }
+        public float ErrorConstant { get; set; }
+        public float MaxSeedHeight { get; set; }
+        public int Iterations { get; set; }
+
+        public static ApplicationOptions Default
+        {
+            get
+            {
+                return new ApplicationOptions()
+                {
+                    TerrainRenderMode = RenderMode.Multitextured,
+                    UVScale = new Vector2(1f / 64f, 1f / 64f),
+                    ErrorConstant = 1.5f,
+                    MaxSeedHeight = 70f,
+                    Iterations = 7
+                };
+            }
+        }
+    }
+
+    /// <summary>
     /// A window class for displaying render results
     /// </summary>
     public class RenderWindow : GameWindow
@@ -22,10 +59,10 @@ namespace TerrainGeneration
         public Renderer Renderer { get; protected set; }
         public Scene Scene { get; protected set; }
         public CameraController CameraController { get; protected set; }
-        public bool bUseTextured = false;
-        public bool bUseMultiTextured = true;
+        public ApplicationOptions Options = ApplicationOptions.Default;
 
-        public RenderWindow() : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 4))
+        public RenderWindow()
+            : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 2))
         {
             Title = "Terrain Generation Project";
             Icon = Properties.Resources.ProgramIcon;
@@ -55,6 +92,75 @@ namespace TerrainGeneration
             base.OnResize(e);
         }
 
+        protected virtual Material LoadTerrainMaterial(TerrainData terrainData)
+        {
+            // Load our shader
+            ShaderProgram terrainShader = -1;
+            Material terrainMaterial = null;
+
+            // Load materials
+            switch (Options.TerrainRenderMode)
+            {
+                case RenderMode.Multitextured:
+                    {
+                        // Load textures
+                        Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                        Scene.Resources.Add(grassTexture);
+
+                        Texture snowTexture = ResourceLoader.LoadTextureFromFile("Textures\\Snow.jpg");
+                        Scene.Resources.Add(snowTexture);
+
+                        Texture dirtTexture = ResourceLoader.LoadTextureFromFile("Textures\\Dirt.jpg");
+                        Scene.Resources.Add(dirtTexture);
+
+                        Texture rockTexture = ResourceLoader.LoadTextureFromFile("Textures\\Rock.jpg");
+                        Scene.Resources.Add(rockTexture);
+
+                        // Load textured material
+                        terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainMultiTextured.vert", "Shaders\\TerrainMultiTextured.frag");
+
+                        var textureArray = new[] { grassTexture, snowTexture, dirtTexture, rockTexture };
+                        var samplerUniforms = new[] { "grassSampler", "snowSampler", "dirtSampler", "rockSampler" };
+
+                        terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, samplerUniforms, textureArray)
+                        {
+                            UVScale = Options.UVScale,
+                            MaxTerrainHeight = terrainData.MaxHeight,
+                            MinTerrainHeight = terrainData.MinHeight
+                        };
+                    }
+                    break;
+
+                case RenderMode.Textured:
+                    {
+                        // Load textures
+                        Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
+                        Scene.Resources.Add(grassTexture);
+
+                        // Load textured material
+                        terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainTextured.vert", "Shaders\\TerrainTextured.frag");
+                        terrainMaterial = new TerrainTextureMaterial(terrainShader, grassTexture)
+                        {
+                            UVScale = Options.UVScale
+                        };
+                    }
+                    break;
+
+                case RenderMode.NoTexture:
+                    {
+                        // Load default material
+                        terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\Terrain.vert", "Shaders\\Terrain.frag");
+                        terrainMaterial = new DefaultMaterial(terrainShader);
+                    }
+                    break;
+            }
+
+            // Add resources to scene (auto-cleanup)
+            Scene.Resources.Add(terrainShader);
+
+            return terrainMaterial;
+        }
+
         protected virtual void CreateScene()
         {
             // Create our scene
@@ -63,63 +169,12 @@ namespace TerrainGeneration
 
             // Generate mesh data
             Debug.WriteLine("Creating Mesh Data...");
-            var heightMap = DiamondSquare.GenerateRandom(1.5f, 70f, 7);
+            var heightMap = DiamondSquare.GenerateRandom(Options.ErrorConstant, Options.MaxSeedHeight, Options.Iterations);
             var terrainData = heightMap.ToTerrainData(cellSize);
             var terrainMesh = terrainData.CreateMesh();
 
-            // Load our shader
             Debug.WriteLine("Loading Materials...");
-            ShaderProgram terrainShader = -1;
-            Material terrainMaterial = null;
-
-            // Load materials
-            if (bUseMultiTextured)
-            {
-                // Load textures
-                Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
-                Scene.Resources.Add(grassTexture);
-
-                Texture snowTexture = ResourceLoader.LoadTextureFromFile("Textures\\Snow.jpg");
-                Scene.Resources.Add(snowTexture);
-
-                Texture dirtTexture = ResourceLoader.LoadTextureFromFile("Textures\\Dirt.jpg");
-                Scene.Resources.Add(dirtTexture);
-
-                Texture rockTexture = ResourceLoader.LoadTextureFromFile("Textures\\Rock.jpg");
-                Scene.Resources.Add(rockTexture);
-
-                // Load textured material
-                terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainMultiTextured.vert", "Shaders\\TerrainMultiTextured.frag");
-
-                var textureArray = new[] { grassTexture, snowTexture, dirtTexture, rockTexture }; 
-                var samplerUniforms = new[] { "grassSampler", "snowSampler", "dirtSampler", "rockSampler" };
-
-                terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, samplerUniforms, textureArray)
-                {
-                    UVScale = new Vector2(1f / 64f, 1f / 64f),
-                    MaxTerrainHeight = terrainData.MaxHeight,
-                    MinTerrainHeight = terrainData.MinHeight
-                };
-            }
-            else if (bUseTextured)
-            {
-                // Load textures
-                Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
-                Scene.Resources.Add(grassTexture);
-
-                // Load textured material
-                terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainTextured.vert", "Shaders\\TerrainTextured.frag");
-                terrainMaterial = new TerrainTextureMaterial(terrainShader, grassTexture)
-                {
-                    UVScale = new Vector2(1f / 64f, 1f / 64f)
-                };
-            }
-            else
-            {
-                // Load default material
-                terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\Terrain.vert", "Shaders\\Terrain.frag");
-                terrainMaterial = new DefaultMaterial(terrainShader);
-            }
+            var terrainMaterial = LoadTerrainMaterial(terrainData);
 
             // Create our terrain entity
             var terrainEntity = new Entity()
@@ -131,9 +186,8 @@ namespace TerrainGeneration
 
             // Add resources to scene (auto-cleanup)
             Scene.Resources.Add(terrainMesh);
-            Scene.Resources.Add(terrainShader);
-            Scene.Entities.Add(terrainEntity); 
-   
+            Scene.Entities.Add(terrainEntity);
+
             // Position the camera correctly
             CameraController = new RotationCameraController(Renderer.Camera, Keyboard, Mouse)
             {
