@@ -77,10 +77,10 @@ namespace TerrainGeneration
                 Scene.Resources.Add(snowTexture);
 
                 Texture dirtTexture = ResourceLoader.LoadTextureFromFile("Textures\\Dirt.jpg");
-                Scene.Resources.Add(snowTexture);
+                Scene.Resources.Add(dirtTexture);
 
                 Texture rockTexture = ResourceLoader.LoadTextureFromFile("Textures\\Rock.jpg");
-                Scene.Resources.Add(snowTexture);
+                Scene.Resources.Add(rockTexture);
 
                 // Load textured material
                 terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainMultiTextured.vert", "Shaders\\TerrainMultiTextured.frag");

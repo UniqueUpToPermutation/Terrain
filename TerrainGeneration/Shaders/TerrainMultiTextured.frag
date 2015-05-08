@@ -19,9 +19,5 @@ void main()
 	float intensity = clamp(-dot(LightDirection, normalize(Normal)), 0.0, 1.0);
 
 	vec3 textureVec = texture(snowSampler, uv).rgb;
-	if (intensity < .5){
-		textureVec = texture(grassSampler, uv).rgb + 5 * texture(grassSampler, uv).rgb;
-	}
-
 	color = textureVec * intensity;
 }
