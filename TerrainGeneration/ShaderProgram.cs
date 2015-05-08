@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 using OpenTK.Graphics.OpenGL;
 
@@ -30,6 +31,8 @@ namespace TerrainGeneration
 
         public void Dispose()
         {
+            Debug.WriteLine("Disposing Texture...");
+
             GL.DeleteTexture(Handle);
         }
     }
@@ -56,6 +59,8 @@ namespace TerrainGeneration
 
         public void Dispose()
         {
+            Debug.WriteLine("Disposing Shader...");
+
             GL.DeleteProgram(Handle);
         }
     }

@@ -65,6 +65,17 @@ namespace TerrainGeneration
             if (ViewProjectionUniform < 0)
                 Debug.WriteLine("Could not find ViewProjection uniform!");
         }
+
+        public void DisposeTextures()
+        {
+            foreach (var texture in Textures)
+                texture.Dispose();
+        }
+
+        public void DisposeShader()
+        {
+            Shader.Dispose();
+        }
     }
 
     /// <summary>
@@ -176,6 +187,24 @@ namespace TerrainGeneration
 
             // Set the UV scale uniform
             GL.Uniform2(uvScaleUniform, ref UVScale);
+        }
+
+        public override void SetParameter(string parameterName, object value)
+        {
+            switch (parameterName)
+            {
+                case "MinTerrainHeight":
+                    MinTerrainHeight = (float)value;
+                    break;
+
+                case "MaxTerrainHeight":
+                    MaxTerrainHeight = (float)value;
+                    break;
+
+                default:
+                    base.SetParameter(parameterName, value);
+                    break;
+            }
         }
     }
 }

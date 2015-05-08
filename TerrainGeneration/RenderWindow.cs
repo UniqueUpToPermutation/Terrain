@@ -146,6 +146,13 @@ namespace TerrainGeneration
         public Scene Scene { get; protected set; }
         public CameraController CameraController { get; protected set; }
         public ApplicationOptions Options;
+        
+        /// <summary>
+        /// Set flag to true when the terrain needs to be regenerated
+        /// </summary>
+        protected bool bRegenerateTerrain = false;
+        protected ShaderProgram TerrainShader { get; set; }
+        protected Material TerrainMaterial { get; set; }
 
         public RenderWindow(ApplicationOptions options)
             : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 2))
@@ -189,6 +196,10 @@ namespace TerrainGeneration
             if (args.Key == Key.Tilde)
                 if (Renderer != null)
                     Renderer.UseWireframe = !Renderer.UseWireframe;
+
+            // Regenerate terrain
+            if (args.Key == Key.G)
+                bRegenerateTerrain = true;
         }
 
         protected override void OnResize(EventArgs e)
@@ -217,16 +228,9 @@ namespace TerrainGeneration
                     {
                         // Load textures
                         Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
-                        Scene.Resources.Add(grassTexture);
-
                         Texture snowTexture = ResourceLoader.LoadTextureFromFile("Textures\\Snow.jpg");
-                        Scene.Resources.Add(snowTexture);
-
                         Texture dirtTexture = ResourceLoader.LoadTextureFromFile("Textures\\Dirt.jpg");
-                        Scene.Resources.Add(dirtTexture);
-
                         Texture rockTexture = ResourceLoader.LoadTextureFromFile("Textures\\Rock.jpg");
-                        Scene.Resources.Add(rockTexture);
 
                         // Load textured material
                         terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainMultiTextured.vert", "Shaders\\TerrainMultiTextured.frag");
@@ -247,7 +251,6 @@ namespace TerrainGeneration
                     {
                         // Load textures
                         Texture grassTexture = ResourceLoader.LoadTextureFromFile("Textures\\Grass.jpg");
-                        Scene.Resources.Add(grassTexture);
 
                         // Load textured material
                         terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainTextured.vert", "Shaders\\TerrainTextured.frag");
@@ -266,9 +269,6 @@ namespace TerrainGeneration
                     }
                     break;
             }
-
-            // Add resources to scene (auto-cleanup)
-            Scene.Resources.Add(terrainShader);
 
             return terrainMaterial;
         }
@@ -299,6 +299,13 @@ namespace TerrainGeneration
         /// </summary>
         protected virtual void CreateScene()
         {
+            // Dispose of scene if neccessary
+            if (Scene != null)
+            {
+                Scene.Dispose();
+                Scene = null;
+            }
+
             // Create our scene
             Scene = new Scene();
             var cellSize = Options.CellSize;
@@ -307,12 +314,23 @@ namespace TerrainGeneration
             Debug.WriteLine("Creating Height Data...");
             var heightMap = DiamondSquare.GenerateRandom(Options.ErrorConstant, Options.MaxSeedHeight, Options.Iterations);
             var terrainData = heightMap.ToTerrainData(cellSize);
-            
-            Debug.WriteLine("Loading Materials...");
-            var terrainMaterial = LoadTerrainMaterial(terrainData);
 
+            // Load materials if necessary
+            if (TerrainMaterial == null)
+            {
+                Debug.WriteLine("Loading Materials...");
+                TerrainMaterial = LoadTerrainMaterial(terrainData);
+            }
+            else
+            {
+                // Make sure the material is aware of new min/max height
+                TerrainMaterial.SetParameter("MinTerrainHeight", terrainData.MinHeight);
+                TerrainMaterial.SetParameter("MaxTerrainHeight", terrainData.MaxHeight);
+            }
+
+            // Create mesh data
             Debug.WriteLine("Creating Mesh Data...");
-            CreateTerrainChunks(terrainData, terrainMaterial);
+            CreateTerrainChunks(terrainData, TerrainMaterial);
 
             // Position the camera correctly
             CameraController = new RotationCameraController(Renderer.Camera, Keyboard, Mouse)
@@ -329,6 +347,13 @@ namespace TerrainGeneration
             // Close the application if the user presses escape
             if (Keyboard[Key.Escape])
                 Close();
+
+            // Regenerate terrain if necessary
+            if (bRegenerateTerrain)
+            {
+                bRegenerateTerrain = false;
+                CreateScene();
+            }
 
             // Update the camera
             if (CameraController != null)
@@ -348,11 +373,20 @@ namespace TerrainGeneration
 
         protected override void OnClosed(EventArgs e)
         {
+            // Dispose of the camera controller
             if (CameraController != null)
                 CameraController.Dispose();
 
-            // Dispose all remaining resources
             Debug.WriteLine("Disposing Resources...");
+
+            // Dispose of the material
+            if (TerrainMaterial != null)
+            {
+                TerrainMaterial.DisposeTextures();
+                TerrainMaterial.DisposeShader();
+            }
+
+            // Dispose all remaining resources
             Scene.Dispose();
             Renderer.Dispose();
             Renderer = null;
