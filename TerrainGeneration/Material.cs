@@ -89,10 +89,22 @@ namespace TerrainGeneration
 
     public class TerrainMultiTextureMaterial : TerrainTextureMaterial
     {
+        public float MinTerrainHeight { get; set; }
+        public float MaxTerrainHeight { get; set; }
+
+        protected int minTerrainHeightUniform = -1;
+        protected int maxTerrainHeightUniform = -1;
+
         public TerrainMultiTextureMaterial(ShaderProgram shader, params Texture[] textures)
             : base(shader)
         {
             Textures.AddRange(textures);
+
+            minTerrainHeightUniform = GL.GetUniformLocation(shader, "MinTerrainHeight");
+            maxTerrainHeightUniform = GL.GetUniformLocation(shader, "MaxTerrainHeight");
+
+            if (minTerrainHeightUniform < 0 || maxTerrainHeightUniform < 0)
+                Debug.WriteLine("Could not find min/max terrain height uniform!");
         }
 
         public override void Apply()
@@ -102,6 +114,9 @@ namespace TerrainGeneration
                 GL.ActiveTexture(TextureUnit.Texture0 + i);
                 GL.BindTexture(TextureTarget.Texture2D, Textures[i]);
             }
+
+            GL.Uniform1(minTerrainHeightUniform, MinTerrainHeight);
+            GL.Uniform1(maxTerrainHeightUniform, MaxTerrainHeight);
 
             GL.Uniform2(uvScaleUniform, ref UVScale);
         }

@@ -41,6 +41,22 @@ namespace TerrainGeneration
         public int DataSizeX { get; protected set; }
         public int DataSizeZ { get; protected set; }
 
+        public float MinHeight
+        {
+            get
+            {
+                return VertexPositions.Min(v => v.Y);
+            }
+        }
+
+        public float MaxHeight
+        {
+            get
+            {
+                return VertexPositions.Max(v => v.Y);
+            }
+        }
+
         protected Vector3[] normalComputionArray;
 
         public Vector3 this[int x, int z]

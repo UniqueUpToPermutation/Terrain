@@ -61,6 +61,12 @@ namespace TerrainGeneration
             Scene = new Scene();
             var cellSize = new Vector3(4f, 1f, 4f);
 
+            // Generate mesh data
+            Debug.WriteLine("Creating Mesh Data...");
+            var heightMap = DiamondSquare.GenerateRandom(1.5f, 70f, 7);
+            var terrainData = heightMap.ToTerrainData(cellSize);
+            var terrainMesh = terrainData.CreateMesh();
+
             // Load our shader
             Debug.WriteLine("Loading Materials...");
             ShaderProgram terrainShader = -1;
@@ -93,7 +99,9 @@ namespace TerrainGeneration
 
                 terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, textureArray)
                 {
-                    UVScale = new Vector2(1f / 64f, 1f / 64f)
+                    UVScale = new Vector2(1f / 64f, 1f / 64f),
+                    MaxTerrainHeight = terrainData.MaxHeight,
+                    MinTerrainHeight = terrainData.MinHeight
                 };
             }
             else if (bUseTextured)
@@ -115,12 +123,8 @@ namespace TerrainGeneration
                 terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\Terrain.vert", "Shaders\\Terrain.frag");
                 terrainMaterial = new DefaultMaterial(terrainShader);
             }
-                               
+
             // Create our terrain entity
-            Debug.WriteLine("Creating Mesh Data...");
-            var heightMap = DiamondSquare.GenerateRandom(1.5f, 70f, 7);
-            var terrainData = heightMap.ToTerrainData(cellSize);
-            var terrainMesh = terrainData.CreateMesh();
             var terrainEntity = new Entity()
             {
                 EntityMesh = terrainMesh,
