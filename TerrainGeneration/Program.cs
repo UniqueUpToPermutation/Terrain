@@ -23,7 +23,7 @@ namespace TerrainGeneration
                 options = ApplicationOptions.FromFile(ConfigFile);
 
             // Create our application and run it
-            var window = new RenderWindow();
+            var window = new RenderWindow(options);
             window.Run();
 
             System.Diagnostics.Debug.WriteLine("Closing Program...");

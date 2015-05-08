@@ -1,12 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ApplicationOptions>
+  <!-- Specify a preset, the program will ignore other config values, available presets are "Default" and "SmallTerrain" -->
   <Preset>Default</Preset>
+
+  <!-- Specify the render mode, options are "Multitextured", "Textured", and "NoTexture" -->
   <RenderMode value="Multitextured" />
+  
+  <!-- Specify the texture scale, the large these values are, the less surface area a texture will cover -->
   <InverseUVScale x="64" y="64" />
+  
+  <!-- Specify the error constant used in terrain generation, higher error produces rougher terrain -->
   <ErrorConstant value="0.5" />
-  <MaxSeedHeight value="100" />
+  
+  <!-- Specify the maximum height of the initial terrain seed -->
+  <MaxSeedHeight value="100.0" />
+  
+  <!-- Specify the number of algorithm iterations -->
   <Iterations value="8" />
+  
+  <!-- Specify the cell size of a terrain patch -->
   <CellSize x="2" y="1" z="2" />
+  
+  <!-- Specify whether we run in fullscreen or windowed mode -->
   <Fullscreen value="false" />
+  
+  <!-- Specify the chunk sizes of terrain -->
   <ChunkSize value="128" />
 </ApplicationOptions>

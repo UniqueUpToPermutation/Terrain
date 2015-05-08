@@ -112,8 +112,8 @@ namespace TerrainGeneration
                     options.TerrainRenderMode = RenderMode.NoTexture;
 
                 var invUVScale = root.Element("InverseUVScale");
-                options.UVScale = new Vector2(Single.Parse(invUVScale.Attribute("x").Value),
-                    Single.Parse(invUVScale.Attribute("y").Value));
+                options.UVScale = new Vector2(1.0f / Single.Parse(invUVScale.Attribute("x").Value),
+                    1.0f / Single.Parse(invUVScale.Attribute("y").Value));
                 options.ErrorConstant = Single.Parse(root.Element("ErrorConstant").Attribute("value").Value);
                 options.MaxSeedHeight = Single.Parse(root.Element("MaxSeedHeight").Attribute("value").Value);
                 options.Iterations = Int32.Parse(root.Element("Iterations").Attribute("value").Value);
