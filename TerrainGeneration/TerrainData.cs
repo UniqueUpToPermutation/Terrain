@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Diagnostics;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -21,6 +22,11 @@ namespace TerrainGeneration
         public bool bCreateNormals;
 
         /// <summary>
+        /// Should the created mesh use triangle strips?
+        /// </summary>
+        public bool bUseTriangleStrips;
+
+        /// <summary>
         /// The bounds of where to create the mesh
         /// </summary>
         public Nullable<Rectangle> MeshBounds;
@@ -32,6 +38,7 @@ namespace TerrainGeneration
                 return new MeshCreationOptions()
                 {
                     bCreateNormals = true,
+                    bUseTriangleStrips = true,
                     MeshBounds = null
                 };
             }
@@ -127,7 +134,7 @@ namespace TerrainGeneration
 
             if (x < DataSizeX - 1 && z > 0)
             {
-                xDif = this[x + 1, z] - vertexPos; 
+                xDif = this[x + 1, z] - vertexPos;
                 zDif = vertexPos - this[x, z - 1];
                 normal += Vector3.Normalize(Vector3.Cross(zDif, xDif));
             }
@@ -141,7 +148,7 @@ namespace TerrainGeneration
 
             if (x < DataSizeX - 1 && z < DataSizeZ - 1)
             {
-                xDif = this[x + 1, z] - vertexPos; 
+                xDif = this[x + 1, z] - vertexPos;
                 zDif = this[x, z + 1] - vertexPos;
                 normal += Vector3.Normalize(Vector3.Cross(zDif, xDif));
             }
@@ -152,6 +159,11 @@ namespace TerrainGeneration
         public int GetIndex(int x, int z)
         {
             return x + z * DataSizeX;
+        }
+
+        public int GetIndex(int x, int z, int dataSizeX)
+        {
+            return x + z * dataSizeX;
         }
 
         public TerrainData(Vector3[] vertexPositions, int dataSizeX, int dataSizeZ)
@@ -176,7 +188,7 @@ namespace TerrainGeneration
                        from x in Enumerable.Range(0, sizeZ)
                        let vecPosition = new Vector2((float)x * cellSize.X, (float)z * cellSize.Y)
                        select new Vector3(vecPosition.X, magnitude * (float)Math.Exp(-(centerPosition - vecPosition).LengthSquared / (2.0f * standardDev * standardDev)), vecPosition.Y);
-                           
+
             return new TerrainData(data.ToArray(), sizeX, sizeZ);
         }
 
@@ -201,7 +213,12 @@ namespace TerrainGeneration
             var positionIndexBuffer = new IndexBuffer(GL.GenBuffer(), DrawElementsType.UnsignedShort);
             var vertexAttributeBuffers = new List<VertexBuffer>();
 
-            var vertexOffsets = new[] 
+            short[] indicies = null;
+
+            if (!options.bUseTriangleStrips)
+            {
+                // Vertex offsets for faces
+                var vertexOffsets = new[] 
                 { 
                     new[] { 0, 0 }, 
                     new[] { 0, 1 }, 
@@ -211,19 +228,45 @@ namespace TerrainGeneration
                     new[] { 1, 1 }
                 };
 
-            // Create index array
-            var indicies = (from z in Enumerable.Range(beginZ, countZ - 1)
-                           from x in Enumerable.Range(beginX, countX - 1)
-                           from offset in vertexOffsets
-                           select (short)GetIndex(x + offset[0], z + offset[1])).ToArray();
+                // Create index array
+                indicies = (from z in Enumerable.Range(0, countZ - 1)
+                            from x in Enumerable.Range(0, countX - 1)
+                            from offset in vertexOffsets
+                            select (short)GetIndex(x + offset[0], z + offset[1], countX)).ToArray();
+            }
+            else
+            {
+                // Construct the triangle strips
+                List<short> tempIndicies = new List<short>();
+               
+                // This generates upside down triangles, so we need to reverse the topology
+                for (int z = 0; z < countZ - 1; ++z)
+                {
+                    tempIndicies.Add((short)GetIndex(0, z, countX));
+                    tempIndicies.AddRange(from x in Enumerable.Range(0, countX)
+                                          from dz in Enumerable.Range(0, 2)
+                                          select (short)GetIndex(x, z + dz, countX));
+                    tempIndicies.Add((short)GetIndex(countX - 1, z + 1, countX));
+                }
+                
+                // For reversal of triangle strip, we require an odd number of vertices
+                if (tempIndicies.Count % 2 == 0)
+                    tempIndicies.Add((short)GetIndex(countX - 1, countZ - 1, countX));
+
+                // Flip the array because I'm lazy
+                tempIndicies.Reverse();
+
+                // Create index array
+                indicies = tempIndicies.ToArray();
+            }
 
             // Select a small section of the vertex position array if necessary
             var vertexBufferData = VertexPositions;
             if (options.MeshBounds.HasValue)
             {
                 vertexBufferData = (from z in Enumerable.Range(beginZ, countZ)
-                                   from x in Enumerable.Range(beginX, countX)
-                                   select this[x, z]).ToArray();
+                                    from x in Enumerable.Range(beginX, countX)
+                                    select this[x, z]).ToArray();
             }
 
             // Load buffer data
@@ -259,13 +302,18 @@ namespace TerrainGeneration
                 vertexAttributeBuffers.Add(normalVertexBuffer);
             }
 
+            Debug.WriteLine("Created Terrain Mesh Chunk...");
+            Debug.WriteLine("Primitive Type: " + (options.bUseTriangleStrips ? PrimitiveType.TriangleStrip : PrimitiveType.Triangles));
+            Debug.WriteLine("Vertex Count: " + vertexBufferData.Length);
+            Debug.WriteLine("Index Count: " + indicies.Length);
+
             // Create the mesh
             return new Mesh()
             {
                 IsIndexed = true,
                 IndexBuffer = positionIndexBuffer,
                 PrimitiveCount = indicies.Length,
-                PrimitiveType = PrimitiveType.Triangles,
+                PrimitiveType = options.bUseTriangleStrips ? PrimitiveType.TriangleStrip : PrimitiveType.Triangles,
                 VertexAttributeBuffers = vertexAttributeBuffers.ToArray()
             };
         }
