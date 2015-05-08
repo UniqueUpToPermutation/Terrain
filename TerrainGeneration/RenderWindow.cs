@@ -35,6 +35,7 @@ namespace TerrainGeneration
         public float MaxSeedHeight { get; set; }
         public int Iterations { get; set; }
         public Vector3 CellSize { get; set; }
+        public bool Fullscreen { get; set; }
 
         public static ApplicationOptions Default
         {
@@ -47,7 +48,8 @@ namespace TerrainGeneration
                     ErrorConstant = 1.5f,
                     MaxSeedHeight = 70f,
                     Iterations = 7,
-                    CellSize = new Vector3(4f, 1f, 4f)
+                    CellSize = new Vector3(4f, 1f, 4f),
+                    Fullscreen = false
                 };
             }
         }
@@ -68,6 +70,9 @@ namespace TerrainGeneration
         {
             Title = "Terrain Generation Project";
             Icon = Properties.Resources.ProgramIcon;
+
+            if (Options.Fullscreen)
+                WindowState = OpenTK.WindowState.Fullscreen;
         }
 
         protected virtual Renderer CreateRenderer()
