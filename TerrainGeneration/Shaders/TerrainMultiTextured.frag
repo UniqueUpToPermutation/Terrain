@@ -37,11 +37,23 @@ void main()
 	//grass on bottom, snow on top
 	vec3 locColor = posFactor * snowSlope + (1 - posFactor) * grassSlope;
 
-	//extreme at tops and bottoms
+	//quadratic bias towards extremes (top and bottom have more weight)
 	float extremeX = abs(.5 - posFactor) * 2;
 	float extremeFactor = (extremeX + 1) * (extremeX - 1) + 1;
 	color = extremeFactor * locColor + (1 - extremeFactor) * slopeColor;
 	
+	//grass on the tops of the hills 
+	if (slope < .3 && posFactor < .6){
+		//normalize
+		float slopeFactor = abs(slope - .2) / .2;
+		color = slopeFactor * grassSlope + (1 - slopeFactor) * color;
+	}
+
+	if (slope < .3 && posFactor >= .8){
+		//normalize
+		float slopeFactor = abs(slope - .2) / .2;
+		color = slopeFactor * snowSlope + (1 - slopeFactor) * color;
+	}
 	//factor in phong
 	color = color * intensity;
 	
