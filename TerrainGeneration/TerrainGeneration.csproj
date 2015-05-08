@@ -95,6 +95,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\Config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\ProgramIcon.ico" />
     <Content Include="Textures\Dirt.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

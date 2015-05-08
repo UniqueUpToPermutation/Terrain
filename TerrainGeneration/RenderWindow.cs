@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Xml.Linq;
 
 using System.Diagnostics;
 
@@ -41,7 +42,7 @@ namespace TerrainGeneration
         /// <summary>
         /// Generate the default terrain
         /// </summary>
-        public static ApplicationOptions Default
+        public static ApplicationOptions SmallTerrain
         {
             get
             {
@@ -62,7 +63,7 @@ namespace TerrainGeneration
         /// <summary>
         /// Generate a larger terrain
         /// </summary>
-        public static ApplicationOptions LargeTerrain
+        public static ApplicationOptions Default
         {
             get
             {
@@ -79,6 +80,61 @@ namespace TerrainGeneration
                 };
             }
         }
+
+        /// <summary>
+        /// Load application options from an XML file
+        /// </summary>
+        /// <param name="filename">The XML file to load</param>
+        /// <returns>The appliation options</returns>
+        public static ApplicationOptions FromFile(string filename)
+        {
+            try
+            {
+                var document = XDocument.Load(filename);
+                var root = document.Element("ApplicationOptions");
+                var preset = root.Element("Preset");
+
+                // If preset specified, then use that
+                if (preset.Value == "Default")
+                    return ApplicationOptions.Default;
+                else if (preset.Value == "SmallTerrain")
+                    return ApplicationOptions.SmallTerrain;
+
+                // Otherwise copy in the values specified
+                var options = new ApplicationOptions();
+
+                var renderMode = root.Element("RenderMode").Attribute("value");
+                if (renderMode.Value == "Multitextured")
+                    options.TerrainRenderMode = RenderMode.Multitextured;
+                else if (renderMode.Value == "Textured")
+                    options.TerrainRenderMode = RenderMode.Textured;
+                else
+                    options.TerrainRenderMode = RenderMode.NoTexture;
+
+                var invUVScale = root.Element("InverseUVScale");
+                options.UVScale = new Vector2(Single.Parse(invUVScale.Attribute("x").Value),
+                    Single.Parse(invUVScale.Attribute("y").Value));
+                options.ErrorConstant = Single.Parse(root.Element("ErrorConstant").Attribute("value").Value);
+                options.MaxSeedHeight = Single.Parse(root.Element("MaxSeedHeight").Attribute("value").Value);
+                options.Iterations = Int32.Parse(root.Element("Iterations").Attribute("value").Value);
+
+                var cellSize = root.Element("CellSize");
+                options.CellSize = new Vector3(Single.Parse(cellSize.Attribute("x").Value),
+                    Single.Parse(cellSize.Attribute("y").Value),
+                    Single.Parse(cellSize.Attribute("z").Value));
+
+                options.Fullscreen = bool.Parse(root.Element("Fullscreen").Attribute("value").Value);
+                options.ChuckSize = Int32.Parse(root.Element("ChunkSize").Attribute("value").Value);
+
+                return options;
+            }
+            catch (Exception e)
+            {
+                Debug.Write("Error Parsing XML: ");
+                Debug.WriteLine(e.Message);
+                return ApplicationOptions.Default;
+            }
+        }
     }
 
     /// <summary>
@@ -89,16 +145,21 @@ namespace TerrainGeneration
         public Renderer Renderer { get; protected set; }
         public Scene Scene { get; protected set; }
         public CameraController CameraController { get; protected set; }
-        public ApplicationOptions Options = ApplicationOptions.LargeTerrain;
+        public ApplicationOptions Options;
 
-        public RenderWindow()
+        public RenderWindow(ApplicationOptions options)
             : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 2))
         {
+            Options = options;
             Title = "Terrain Generation Project";
             Icon = Properties.Resources.ProgramIcon;
 
             if (Options.Fullscreen)
                 WindowState = OpenTK.WindowState.Fullscreen;
+        }
+
+        public RenderWindow() : this(ApplicationOptions.Default)
+        {
         }
 
         protected virtual Renderer CreateRenderer()
