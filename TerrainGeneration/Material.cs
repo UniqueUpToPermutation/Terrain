@@ -94,8 +94,9 @@ namespace TerrainGeneration
 
         protected int minTerrainHeightUniform = -1;
         protected int maxTerrainHeightUniform = -1;
+        protected int[] samplerUniformLocations;
 
-        public TerrainMultiTextureMaterial(ShaderProgram shader, params Texture[] textures)
+        public TerrainMultiTextureMaterial(ShaderProgram shader, string[] samplerUniforms, Texture[] textures)
             : base(shader)
         {
             Textures.AddRange(textures);
@@ -105,6 +106,12 @@ namespace TerrainGeneration
 
             if (minTerrainHeightUniform < 0 || maxTerrainHeightUniform < 0)
                 Debug.WriteLine("Could not find min/max terrain height uniform!");
+
+            samplerUniformLocations = (from samplerUniform in samplerUniforms
+                                      select GL.GetUniformLocation(shader, samplerUniform)).ToArray();
+
+            if (samplerUniformLocations.Contains(-1))
+                Debug.WriteLine("Failed to find a sampler uniform!");
         }
 
         public override void Apply()
@@ -113,6 +120,7 @@ namespace TerrainGeneration
             {
                 GL.ActiveTexture(TextureUnit.Texture0 + i);
                 GL.BindTexture(TextureTarget.Texture2D, Textures[i]);
+                GL.Uniform1(samplerUniformLocations[i], i);
             }
 
             GL.Uniform1(minTerrainHeightUniform, MinTerrainHeight);

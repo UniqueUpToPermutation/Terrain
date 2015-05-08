@@ -91,13 +91,10 @@ namespace TerrainGeneration
                 // Load textured material
                 terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainMultiTextured.vert", "Shaders\\TerrainMultiTextured.frag");
 
-                Texture[] textureArray = new Texture[4];
-                textureArray[0] = grassTexture;
-                textureArray[1] = snowTexture;
-                textureArray[2] = dirtTexture;
-                textureArray[3] = rockTexture;
+                var textureArray = new[] { grassTexture, snowTexture, dirtTexture, rockTexture };
+                var samplerUniforms = new[] { "grassSampler", "snowSampler", "dirtSampler", "rockSampler" };
 
-                terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, textureArray)
+                terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, samplerUniforms, textureArray)
                 {
                     UVScale = new Vector2(1f / 64f, 1f / 64f),
                     MaxTerrainHeight = terrainData.MaxHeight,

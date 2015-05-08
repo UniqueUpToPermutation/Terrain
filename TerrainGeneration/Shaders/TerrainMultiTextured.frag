@@ -24,7 +24,7 @@ void main()
 	float slope = 1.0 - newNormal.y;
 
 	//snow peak
-	if (Position.y > 90){
+	/*if (Position.y > 90){
 		float blendFactor = (Position.y - 90) / 10;
 		color = (1-blendFactor) * rockSlope + blendFactor * snowSlope;
 	}
@@ -42,11 +42,11 @@ void main()
 
 	else{
 		color = rockSlope;
-	}
-	//vec2 uv = vec2(Position.x * UVScale.x, Position.z * UVScale.y);
-	//float intensity = clamp(-dot(LightDirection, normalize(Normal)), 0.0, 1.0);
+	}*/
+	vec2 uv = vec2(Position.x * UVScale.x, Position.z * UVScale.y);
+	float intensity = clamp(-dot(LightDirection, normalize(Normal)), 0.0, 1.0);
 
 	//vec3 textureVec = texture(grassSampler, uv).rgb;
-	//vec3 textureVec = texture(dirtSampler, uv).rgb;
-	//color = textureVec * intensity;
+	vec3 textureVec = texture(dirtSampler, uv).rgb;
+	color = textureVec * intensity;
 }
