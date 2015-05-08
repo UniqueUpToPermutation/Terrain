@@ -70,7 +70,7 @@ namespace TerrainGeneration
                 {
                     TerrainRenderMode = RenderMode.Multitextured,
                     UVScale = new Vector2(1f / 64f, 1f / 64f),
-                    ErrorConstant = 0.8f,
+                    ErrorConstant = 0.75f,
                     MaxSeedHeight = 20f,
                     Iterations = 8,
                     CellSize = new Vector3(2f, 1f, 2f),
