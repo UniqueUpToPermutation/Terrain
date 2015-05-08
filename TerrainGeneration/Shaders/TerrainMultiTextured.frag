@@ -46,5 +46,4 @@ void main()
 	color = color * intensity;
 	
 	//vec3 textureVec = texture(snowSampler, uv).rgb;
-	//color = textureVec * intensity;
 }
