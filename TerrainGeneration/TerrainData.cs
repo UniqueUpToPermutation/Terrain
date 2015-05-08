@@ -20,6 +20,11 @@ namespace TerrainGeneration
         /// </summary>
         public bool bCreateNormals;
 
+        /// <summary>
+        /// The bounds of where to create the mesh
+        /// </summary>
+        public Nullable<Rectangle> MeshBounds;
+
         public static MeshCreationOptions Default
         {
             get
@@ -27,6 +32,7 @@ namespace TerrainGeneration
                 return new MeshCreationOptions()
                 {
                     bCreateNormals = true,
+                    MeshBounds = null
                 };
             }
         }
@@ -168,6 +174,11 @@ namespace TerrainGeneration
         /// <returns></returns>
         public Mesh CreateMesh(MeshCreationOptions options)
         {
+            var beginX = (options.MeshBounds.HasValue ? options.MeshBounds.Value.X : 0);
+            var beginZ = (options.MeshBounds.HasValue ? options.MeshBounds.Value.Y : 0);
+            var countX = (options.MeshBounds.HasValue ? options.MeshBounds.Value.Width : DataSizeX);
+            var countZ = (options.MeshBounds.HasValue ? options.MeshBounds.Value.Height : DataSizeZ);
+
             var positionVertexBuffer = new VertexBuffer(GL.GenBuffer(), 3, VertexAttribPointerType.Float);
             var positionIndexBuffer = new IndexBuffer(GL.GenBuffer(), DrawElementsType.UnsignedShort);
             var vertexAttributeBuffers = new List<VertexBuffer>();
@@ -183,10 +194,19 @@ namespace TerrainGeneration
                 };
 
             // Create index array
-            var indicies = (from z in Enumerable.Range(0, DataSizeZ - 1)
-                           from x in Enumerable.Range(0, DataSizeX - 1)
+            var indicies = (from z in Enumerable.Range(beginZ, countZ - 1)
+                           from x in Enumerable.Range(beginX, countX - 1)
                            from offset in vertexOffsets
                            select (short)GetIndex(x + offset[0], z + offset[1])).ToArray();
+
+            // Select a small section of the vertex position array if necessary
+            var vertexBufferData = VertexPositions;
+            if (options.MeshBounds.HasValue)
+            {
+                vertexBufferData = (from z in Enumerable.Range(beginZ, countZ)
+                                   from x in Enumerable.Range(beginX, countX)
+                                   select this[x, z]).ToArray();
+            }
 
             // Load buffer data
             GL.BindBuffer(BufferTarget.ArrayBuffer, positionVertexBuffer.Handle);
