@@ -91,7 +91,7 @@ namespace TerrainGeneration
                 // Load textured material
                 terrainShader = ResourceLoader.LoadProgramFromFile("Shaders\\TerrainMultiTextured.vert", "Shaders\\TerrainMultiTextured.frag");
 
-                var textureArray = new[] { grassTexture, snowTexture, dirtTexture, rockTexture };
+                var textureArray = new[] { grassTexture, snowTexture, dirtTexture, rockTexture }; 
                 var samplerUniforms = new[] { "grassSampler", "snowSampler", "dirtSampler", "rockSampler" };
 
                 terrainMaterial = new TerrainMultiTextureMaterial(terrainShader, samplerUniforms, textureArray)
