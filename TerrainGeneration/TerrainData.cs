@@ -47,6 +47,9 @@ namespace TerrainGeneration
         public int DataSizeX { get; protected set; }
         public int DataSizeZ { get; protected set; }
 
+        /// <summary>
+        /// The minimum height of this data
+        /// </summary>
         public float MinHeight
         {
             get
@@ -55,6 +58,9 @@ namespace TerrainGeneration
             }
         }
 
+        /// <summary>
+        /// The maximum height of this data
+        /// </summary>
         public float MaxHeight
         {
             get
@@ -77,6 +83,12 @@ namespace TerrainGeneration
             }
         }
 
+        /// <summary>
+        /// Get the normal of a particular face in the data
+        /// </summary>
+        /// <param name="x">The x position of the face</param>
+        /// <param name="z">The z position of the face</param>
+        /// <returns>The normal of the face</returns>
         public Vector3 GetFaceNormal(int x, int z)
         {
             if (x >= 0 && x < DataSizeX - 1 && z >= 0 && z < DataSizeZ - 1)
@@ -93,6 +105,12 @@ namespace TerrainGeneration
                 return Vector3.Zero;
         }
 
+        /// <summary>
+        /// Get the normal of a particular vertex in the data
+        /// </summary>
+        /// <param name="x">The x position of the vertex</param>
+        /// <param name="z">The z position of the vertex</param>
+        /// <returns>The normal of the vertex</returns>
         public Vector3 GetVertexNormal(int x, int z)
         {
             var normal = Vector3.Zero;

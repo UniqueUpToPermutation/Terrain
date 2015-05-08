@@ -34,6 +34,7 @@ namespace TerrainGeneration
         public float ErrorConstant { get; set; }
         public float MaxSeedHeight { get; set; }
         public int Iterations { get; set; }
+        public Vector3 CellSize { get; set; }
 
         public static ApplicationOptions Default
         {
@@ -45,7 +46,8 @@ namespace TerrainGeneration
                     UVScale = new Vector2(1f / 64f, 1f / 64f),
                     ErrorConstant = 1.5f,
                     MaxSeedHeight = 70f,
-                    Iterations = 7
+                    Iterations = 7,
+                    CellSize = new Vector3(4f, 1f, 4f)
                 };
             }
         }
@@ -165,7 +167,7 @@ namespace TerrainGeneration
         {
             // Create our scene
             Scene = new Scene();
-            var cellSize = new Vector3(4f, 1f, 4f);
+            var cellSize = Options.CellSize;
 
             // Generate mesh data
             Debug.WriteLine("Creating Mesh Data...");
