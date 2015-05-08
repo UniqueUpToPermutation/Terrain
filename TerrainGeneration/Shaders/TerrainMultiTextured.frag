@@ -13,7 +13,7 @@ uniform sampler2D dirtSampler;
 uniform sampler2D rockSampler;
 
 void main()
-{
+{	/*
 	//comment
 	vec3 snowSlope = vec3(1, 1, 1);
 	vec3 rockSlope = vec3(.5, .5, .5);
@@ -24,7 +24,7 @@ void main()
 	float slope = 1.0 - newNormal.y;
 
 	//snow peak
-	/*if (Position.y > 90){
+	if (Position.y > 90){
 		float blendFactor = (Position.y - 90) / 10;
 		color = (1-blendFactor) * rockSlope + blendFactor * snowSlope;
 	}
@@ -45,8 +45,8 @@ void main()
 	}*/
 	vec2 uv = vec2(Position.x * UVScale.x, Position.z * UVScale.y);
 	float intensity = clamp(-dot(LightDirection, normalize(Normal)), 0.0, 1.0);
-
+	
 	//vec3 textureVec = texture(grassSampler, uv).rgb;
-	vec3 textureVec = texture(dirtSampler, uv).rgb;
+	vec3 textureVec = texture(snowSampler, uv).rgb;
 	color = textureVec * intensity;
 }
