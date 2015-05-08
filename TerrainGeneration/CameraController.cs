@@ -28,6 +28,7 @@ namespace TerrainGeneration
         public float Phi = 0.0f;
         public float Theta = 0.0f;
         public float Radius = 64.0f;
+        public const float MinRadius = 1.0f;
         public Vector3 CameraCenter = Vector3.Zero;
 
         public float PhiVelocity = 0.01f;
@@ -60,7 +61,7 @@ namespace TerrainGeneration
         private void OnMouseWheelChanged(object sender, MouseWheelEventArgs e)
         {
             Radius += RadiusVelocity * (float)e.Delta;
-            Radius = Math.Max(Radius, 0f);
+            Radius = Math.Max(Radius, MinRadius);
 
             UpdateCameraParams();
         }

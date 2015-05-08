@@ -16,7 +16,23 @@ namespace TerrainGeneration
         public Camera Camera { get; set; }
 
         protected Size clientSize;
-        protected int vertexArray;
+        protected int vertexArray = -1;
+        protected bool bUseWireframe = false;
+
+        public bool UseWireframe
+        {
+            get { return bUseWireframe; }
+            set
+            {
+                bUseWireframe = value;
+                GL.PolygonMode(MaterialFace.FrontAndBack, (bUseWireframe ? PolygonMode.Line : PolygonMode.Fill));
+            }
+        }
+
+        public Size ClientSize
+        {
+            get { return clientSize; }
+        }
 
         public void Initialize(RenderWindow window)
         {
@@ -40,6 +56,9 @@ namespace TerrainGeneration
 
             // Cull back faces
             GL.Enable(EnableCap.CullFace);
+
+            // Set wireframe if necessary
+            GL.PolygonMode(MaterialFace.FrontAndBack, (bUseWireframe ? PolygonMode.Line : PolygonMode.Fill));
         }
 
         public void OnResize(Size ClientSize)

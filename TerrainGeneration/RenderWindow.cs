@@ -79,12 +79,22 @@ namespace TerrainGeneration
         {
             base.OnLoad(e);
 
+            Keyboard.KeyDown += OnKeyDown;
+
             Debug.WriteLine("Initializing Renderer...");
             Renderer = CreateRenderer();
             Renderer.Initialize(this);
 
             Debug.WriteLine("Creating Scene...");
             CreateScene();
+        }
+
+        protected void OnKeyDown(object obj, KeyboardKeyEventArgs args)
+        {
+            // Toggle wireframe
+            if (args.Key == Key.Tilde)
+                if (Renderer != null)
+                    Renderer.UseWireframe = !Renderer.UseWireframe;
         }
 
         protected override void OnResize(EventArgs e)
