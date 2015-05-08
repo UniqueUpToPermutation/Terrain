@@ -188,6 +188,7 @@ namespace TerrainGeneration
             Debug.WriteLine("Creating Mesh Data...");
             var heightMap = DiamondSquare.GenerateRandom(Options.ErrorConstant, Options.MaxSeedHeight, Options.Iterations);
             var terrainData = heightMap.ToTerrainData(cellSize);
+
             var terrainMesh = terrainData.CreateMesh();
 
             Debug.WriteLine("Loading Materials...");

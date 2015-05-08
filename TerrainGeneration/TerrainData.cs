@@ -271,7 +271,7 @@ namespace TerrainGeneration
 
             // Load buffer data
             GL.BindBuffer(BufferTarget.ArrayBuffer, positionVertexBuffer.Handle);
-            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vector3.SizeInBytes * VertexPositions.Length), VertexPositions, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vector3.SizeInBytes * vertexBufferData.Length), vertexBufferData, BufferUsageHint.StaticDraw);
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, positionIndexBuffer.Handle);
             GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(short) * indicies.Length), indicies, BufferUsageHint.StaticDraw);
@@ -282,15 +282,15 @@ namespace TerrainGeneration
             // Create normal data?
             if (options.bCreateNormals)
             {
-                var normalsData = new Vector3[DataSizeX * DataSizeZ];
+                var normalsData = new Vector3[countX * countZ];
 
                 // Compute normals by weighted average of nieghboring faces
-                for (int z = 0; z < DataSizeZ; ++z)
-                    for (int x = 0; x < DataSizeX; ++x)
+                for (int z = 0; z < countZ; ++z)
+                    for (int x = 0; x < countX; ++x)
                     {
-                        var normal = GetVertexNormal(x, z);
+                        var normal = GetVertexNormal(x + beginX, z + beginZ);
                         normal.Normalize();
-                        normalsData[x + z * DataSizeX] = normal;
+                        normalsData[x + z * countX] = normal;
                     }
 
                 // Load data into an OpenGL buffer
