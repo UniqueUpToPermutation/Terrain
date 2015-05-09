@@ -36,6 +36,18 @@ namespace TerrainGeneration
         protected Vector3 up = Vector3.UnitY;
         protected CameraType type = CameraType.Perspective;
 
+        protected int renderWidth;
+        protected int renderHeight;
+
+        public int RenderWidth { get { return renderWidth; } set { renderWidth = value; } }
+        public int RenderHeight { get { return renderHeight; } set { renderHeight = value; } }
+
+        public Camera(int renderWidth, int renderHeight)
+        {
+            this.renderWidth = renderWidth;
+            this.renderHeight = renderHeight;
+        }
+
         public float FieldOfView 
         {
             get

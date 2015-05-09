@@ -48,7 +48,7 @@ namespace TerrainGeneration
             clientSize = window.ClientSize;
 
             // Create camera
-            Camera = new TerrainGeneration.Camera();
+            Camera = new TerrainGeneration.Camera(clientSize.Width, clientSize.Height);
 
             // Set our clear color
             GL.ClearColor(Color.CornflowerBlue);
