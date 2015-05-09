@@ -200,6 +200,27 @@ namespace TerrainGeneration
             // Regenerate terrain
             if (args.Key == Key.G)
                 bRegenerateTerrain = true;
+
+            if (args.Key == Key.C){
+                if (CameraController is RotationCameraController){
+                    CameraController.Dispose();
+                    CameraController = new FirstPersonCameraController  (Renderer.Camera, Keyboard, Mouse)
+                    {
+                        Phi = (float)Math.PI / 4f,
+                    };
+                }
+
+                else if (CameraController is FirstPersonCameraController)
+                {
+                    CameraController.Dispose();
+                    CameraController = new RotationCameraController(Renderer.Camera, Keyboard, Mouse)
+                    {
+                        CameraCenter = new Vector3(cellSize.X * (float)heightMap.Width / 2f, 0f, cellSize.Z * (float)heightMap.Width / 2f),
+                        Phi = (float)Math.PI / 4f,
+                        Radius = cellSize.X * (float)heightMap.Width / 2f + cellSize.Z * (float)heightMap.Width / 2f
+                    };
+                }
+            }
         }
 
         protected override void OnResize(EventArgs e)
