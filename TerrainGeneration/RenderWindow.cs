@@ -146,13 +146,15 @@ namespace TerrainGeneration
         public Scene Scene { get; protected set; }
         public CameraController CameraController { get; protected set; }
         public ApplicationOptions Options;
-        
+
         /// <summary>
         /// Set flag to true when the terrain needs to be regenerated
         /// </summary>
         protected bool bRegenerateTerrain = false;
+
         protected ShaderProgram TerrainShader { get; set; }
         protected Material TerrainMaterial { get; set; }
+        protected Size HeightMapSize { get; set; }
 
         public RenderWindow(ApplicationOptions options)
             : base(800, 600, new OpenTK.Graphics.GraphicsMode(new OpenTK.Graphics.ColorFormat(8), 24, 0, 2))
@@ -165,7 +167,8 @@ namespace TerrainGeneration
                 WindowState = OpenTK.WindowState.Fullscreen;
         }
 
-        public RenderWindow() : this(ApplicationOptions.Default)
+        public RenderWindow()
+            : this(ApplicationOptions.Default)
         {
         }
 
@@ -201,25 +204,31 @@ namespace TerrainGeneration
             if (args.Key == Key.G)
                 bRegenerateTerrain = true;
 
-            if (args.Key == Key.C){
-                if (CameraController is RotationCameraController){
+            // Camera type toggle
+            if (args.Key == Key.C)
+            {
+                // Switch from rotation camera to first person camera
+                if (CameraController is RotationCameraController)
+                {
                     CameraController.Dispose();
-                    CameraController = new FirstPersonCameraController  (Renderer.Camera, Keyboard, Mouse)
-                    {
-                        Phi = (float)Math.PI / 4f,
-                    };
+                    CameraController = new FirstPersonCameraController(Renderer.Camera, Keyboard, Mouse);
                 }
 
+                // Switch from first person camera to rotation camera
                 else if (CameraController is FirstPersonCameraController)
                 {
+                    var cellSize = Options.CellSize;
                     CameraController.Dispose();
                     CameraController = new RotationCameraController(Renderer.Camera, Keyboard, Mouse)
                     {
-                        CameraCenter = new Vector3(cellSize.X * (float)heightMap.Width / 2f, 0f, cellSize.Z * (float)heightMap.Width / 2f),
+                        CameraCenter = new Vector3(cellSize.X * (float)HeightMapSize.Width / 2f, 0f, cellSize.Z * (float)HeightMapSize.Height / 2f),
                         Phi = (float)Math.PI / 4f,
-                        Radius = cellSize.X * (float)heightMap.Width / 2f + cellSize.Z * (float)heightMap.Width / 2f
+                        Radius = cellSize.X * (float)HeightMapSize.Width / 2f + cellSize.Z * (float)HeightMapSize.Height / 2f
                     };
                 }
+
+                // Update camera parameters
+                CameraController.UpdateCameraParams();
             }
         }
 
@@ -353,18 +362,15 @@ namespace TerrainGeneration
             Debug.WriteLine("Creating Mesh Data...");
             CreateTerrainChunks(terrainData, TerrainMaterial);
 
-            // Position the camera correctly
-            CameraController = new FirstPersonCameraController(Renderer.Camera, Keyboard, Mouse)
-            {
-                Phi = (float)Math.PI / 4f,
-            };
+            HeightMapSize = new System.Drawing.Size(heightMap.Width, heightMap.Height);
 
-            /*CameraController = new RotationCameraController(Renderer.Camera, Keyboard, Mouse)
+            // Create the camera controller and position accordingly
+            CameraController = new RotationCameraController(Renderer.Camera, Keyboard, Mouse)
             {
-                CameraCenter = new Vector3(cellSize.X * (float)heightMap.Width / 2f, 0f, cellSize.Z * (float)heightMap.Width / 2f),
+                CameraCenter = new Vector3(cellSize.X * (float)HeightMapSize.Width / 2f, 0f, cellSize.Z * (float)HeightMapSize.Height / 2f),
                 Phi = (float)Math.PI / 4f,
-                Radius = cellSize.X * (float)heightMap.Width / 2f + cellSize.Z * (float)heightMap.Width / 2f
-            };*/
+                Radius = cellSize.X * (float)HeightMapSize.Width / 2f + cellSize.Z * (float)HeightMapSize.Height / 2f
+            };
 
             CameraController.UpdateCameraParams();
         }

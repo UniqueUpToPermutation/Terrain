@@ -32,8 +32,9 @@ namespace TerrainGeneration
 
         public float PhiVelocity = 0.01f;
         public float ThetaVelocity = 0.01f;
-        public float MoveVelocity = 40.0f;
+        public float MoveVelocity = 120.0f;
 
+        protected float phiError = 0.1f;
         protected int lastMouseX = 0;
         protected int lastMouseY = 0;
         protected int lastMouseWheel = 0;
@@ -53,7 +54,18 @@ namespace TerrainGeneration
             mouse.ButtonDown += OnMouseDown;
             mouse.ButtonUp += OnMouseUp;
 
+            ComputeSphericalCoordinates(camera);
             UpdateCameraParams();
+        }
+
+        protected void ComputeSphericalCoordinates(Camera camera)
+        {
+            var cameraToTarget = camera.Target - camera.Position;
+
+            Theta = (float)Math.Atan2(cameraToTarget.Z, cameraToTarget.X);
+            Phi = (float)Math.Acos(cameraToTarget.Y / cameraToTarget.Length);
+
+            ClampAngles();
         }
 
         public Vector3 LookDirection
@@ -81,6 +93,7 @@ namespace TerrainGeneration
         {
             var SideDirection = Vector3.Cross(LookDirection, up);
 
+            // Move camera laterally
             if (keyboard[Key.W])
                 Camera.Position += LookDirection * MoveVelocity * (float)e.Time;
             if (keyboard[Key.S])
@@ -90,6 +103,7 @@ namespace TerrainGeneration
             if (keyboard[Key.D])
                 Camera.Position += SideDirection * MoveVelocity * (float)e.Time;
 
+            // Rotate camera if necessary
             if (bUpdateCameraRotation)
             {
                 var deltaX = (float)(mouse.X - lastMouseX);
@@ -101,11 +115,16 @@ namespace TerrainGeneration
                 Phi += deltaY * PhiVelocity;
                 Theta += deltaX * ThetaVelocity;
 
-                Phi = Clamp(Phi, -(float)Math.PI, (float)Math.PI);
-                Theta = Theta % (float)(2.0 * Math.PI);
+                ClampAngles();
             }
 
             UpdateCameraParams();
+        }
+
+        public void ClampAngles()
+        {
+            Phi = Clamp(Phi, phiError, (float)Math.PI - phiError);
+            Theta = Theta % (float)(2.0 * Math.PI);
         }
 
         public override void UpdateCameraParams()
