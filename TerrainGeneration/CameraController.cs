@@ -20,20 +20,19 @@ namespace TerrainGeneration
         public abstract void Dispose();
     }
 
-
-    public class OtherCameraController : CameraController
+    /// <summary>
+    /// A camera controller which allows the user to look around in first person
+    /// </summary>
+    public class FirstPersonCameraController : CameraController
     {
         private Vector3 up = Vector3.UnitY;
 
         public float Phi = 0.0f;
         public float Theta = 0.0f;
-        public float Radius = 64.0f;
-        public const float MinRadius = 1.0f;
-        public Vector3 CameraCenter = Vector3.Zero;
 
         public float PhiVelocity = 0.01f;
         public float ThetaVelocity = 0.01f;
-        public float RadiusVelocity = 4.0f;
+        public float MoveVelocity = 40.0f;
 
         protected int lastMouseX = 0;
         protected int lastMouseY = 0;
@@ -42,9 +41,9 @@ namespace TerrainGeneration
         protected KeyboardDevice keyboard;
         protected MouseDevice mouse;
 
-        protected bool bUpdateCamera = false;
+        protected bool bUpdateCameraRotation = false;
 
-        public OtherCameraController(Camera camera, KeyboardDevice keyboard, MouseDevice mouse)
+        public FirstPersonCameraController(Camera camera, KeyboardDevice keyboard, MouseDevice mouse)
         {
             Camera = camera;
 
@@ -53,10 +52,6 @@ namespace TerrainGeneration
 
             mouse.ButtonDown += OnMouseDown;
             mouse.ButtonUp += OnMouseUp;
-            mouse.WheelChanged += OnMouseWheelChanged;
-
-            keyboard.KeyDown += OnKeyDown;
-            keyboard.KeyUp += OnKeyUp;
 
             UpdateCameraParams();
         }
@@ -65,62 +60,38 @@ namespace TerrainGeneration
         {
             get
             {
-              return new Vector3((float)(Math.Cos(Theta) * Math.Sin(Phi)), (float)Math.Cos(Phi), (float)(Math.Sin(Theta) * Math.Sin(Phi)));
+                return new Vector3((float)(Math.Cos(Theta) * Math.Sin(Phi)), (float)Math.Cos(Phi), (float)(Math.Sin(Theta) * Math.Sin(Phi)));
             }
-        }
-
-        private void OnMouseWheelChanged(object sender, MouseWheelEventArgs e)
-        {
-            Radius += RadiusVelocity * (float)e.Delta;
-            Radius = Math.Max(Radius, MinRadius);
-
-            UpdateCameraParams();
         }
 
         private void OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            bUpdateCamera = false;
+            bUpdateCameraRotation = false;
         }
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            bUpdateCamera = true;
+            bUpdateCameraRotation = true;
 
             lastMouseX = e.X;
             lastMouseY = e.Y;
         }
 
-        private void OnKeyUp(object sender, KeyboardKeyEventArgs e)
-        {
-            
-
-            bUpdateCamera = false;
-        }
-
-        private void OnKeyDown(object sender, KeyboardKeyEventArgs e)
-        {
-            if (keyboard[Key.W] || keyboard[Key.A] || keyboard[Key.S] || keyboard[Key.D])
-                bUpdateCamera = true;
-            else
-                bUpdateCamera = false;
-        }
-
         public override void UpdateCamera(FrameEventArgs e)
         {
-            if (bUpdateCamera)
-            {
-                var SideDirection = Vector3.Cross(LookDirection, up);
+            var SideDirection = Vector3.Cross(LookDirection, up);
 
-                if (keyboard[Key.W])
-                    Camera.Position+= LookDirection * RadiusVelocity;
-                    
-                if (keyboard[Key.S])
-                    Camera.Position -= LookDirection * RadiusVelocity;
-                if (keyboard[Key.A])
-                    Camera.Position -= SideDirection * RadiusVelocity;
-                if (keyboard[Key.D])
-                    Camera.Position += SideDirection * RadiusVelocity;
-                
+            if (keyboard[Key.W])
+                Camera.Position += LookDirection * MoveVelocity * (float)e.Time;
+            if (keyboard[Key.S])
+                Camera.Position -= LookDirection * MoveVelocity * (float)e.Time;
+            if (keyboard[Key.A])
+                Camera.Position -= SideDirection * MoveVelocity * (float)e.Time;
+            if (keyboard[Key.D])
+                Camera.Position += SideDirection * MoveVelocity * (float)e.Time;
+
+            if (bUpdateCameraRotation)
+            {
                 var deltaX = (float)(mouse.X - lastMouseX);
                 var deltaY = (float)(mouse.Y - lastMouseY);
 
@@ -132,15 +103,14 @@ namespace TerrainGeneration
 
                 Phi = Clamp(Phi, -(float)Math.PI, (float)Math.PI);
                 Theta = Theta % (float)(2.0 * Math.PI);
-
-                UpdateCameraParams();
             }
+
+            UpdateCameraParams();
         }
 
         public override void UpdateCameraParams()
         {
             Camera.Target = Camera.Position + LookDirection;
-            
         }
 
         public float Clamp(float value, float min, float max)
@@ -152,9 +122,6 @@ namespace TerrainGeneration
         {
             mouse.ButtonDown -= OnMouseDown;
             mouse.ButtonUp -= OnMouseUp;
-
-            keyboard.KeyDown -= OnKeyDown;
-            keyboard.KeyUp -= OnKeyUp;
         }
     }
 
@@ -251,7 +218,8 @@ namespace TerrainGeneration
         public override void Dispose()
         {
             mouse.ButtonDown -= OnMouseDown;
-            mouse.ButtonUp -= OnMouseUp;            
+            mouse.ButtonUp -= OnMouseUp;
+            mouse.WheelChanged -= OnMouseWheelChanged;
         }
     }
 }
